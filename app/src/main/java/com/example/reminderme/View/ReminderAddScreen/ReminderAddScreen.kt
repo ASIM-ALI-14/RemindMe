@@ -1,6 +1,5 @@
-package com.example.reminderme.Veiw.ReminderAddScreen
+package com.example.reminderme.View.ReminderAddScreen
 
-import android.R.attr.priority
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -53,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import com.example.reminderme.Model.Reminder
 
 import com.example.reminderme.Model.priorities
-import com.example.reminderme.VeiwModel.ReminderViewModel
+import com.example.reminderme.ViewModel.ReminderViewModel
 import kotlinx.coroutines.launch
 
 

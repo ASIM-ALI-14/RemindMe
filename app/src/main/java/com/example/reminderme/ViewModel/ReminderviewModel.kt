@@ -1,4 +1,4 @@
-package com.example.reminderme.VeiwModel
+package com.example.reminderme.ViewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

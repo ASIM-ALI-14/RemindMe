@@ -1,4 +1,4 @@
-package com.example.reminderme.Veiw.ReminderAddScreen
+package com.example.reminderme.View.ReminderAddScreen
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -24,8 +24,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.reminderme.VeiwModel.ReminderViewModel
 import kotlinx.coroutines.launch
 
 

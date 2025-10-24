@@ -1,4 +1,4 @@
-package com.example.reminderme.Veiw.ReminderAddScreen
+package com.example.reminderme.View.ReminderAddScreen
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable

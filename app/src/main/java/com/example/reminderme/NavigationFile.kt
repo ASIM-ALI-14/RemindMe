@@ -8,45 +8,41 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.reminderme.Model.Screen
-import com.example.reminderme.Veiw.MainScreen.MainScreen
-import com.example.reminderme.Veiw.ReminderAddScreen.AddReminderScreen
-import com.example.reminderme.Veiw.SplashScreen.SplashScreen
-import com.example.reminderme.VeiwModel.ReminderViewModel
+import com.example.reminderme.View.ReminderAddScreen.AddReminderScreen
+import com.example.reminderme.View.SplashScreen.SplashScreen
+import com.example.reminderme.ViewModel.ReminderViewModel
+import com.example.reminderme.View.MainScreen.MainScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-
+    val viewModel: ReminderViewModel = viewModel()
     NavHost(
-        navController = navController,
-        startDestination = Screen.Splash.route
+        navController =
+            navController, startDestination = Screen.Splash.route
     ) {
         composable(Screen.Splash.route) {
             SplashScreen(
                 onGetStartedClick = {
                     navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                        popUpTo(Screen.Splash.route) {
+                            inclusive = true
+                        }
                     }
-                }
-            )
+                })
         }
-
         composable(Screen.Main.route) {
-            val viewModel: ReminderViewModel = viewModel()
+           
             MainScreen(
                 viewModel = viewModel,
-                onNavigateToAddReminder = {
-                    navController.navigate(Screen.AddReminder.route)
-                }
-            )
+                onNavigateToAddReminder = { navController.navigate(Screen.AddReminder.route) })
         }
-
         composable(Screen.AddReminder.route) {
-            val viewModel: ReminderViewModel = viewModel()
+            // use the same viewModel instance from AppNavigation
             AddReminderScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                viewModel = viewModel
             )
         }
     }

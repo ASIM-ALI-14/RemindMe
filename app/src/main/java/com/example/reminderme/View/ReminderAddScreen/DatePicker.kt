@@ -1,4 +1,4 @@
-package com.example.reminderme.Veiw.ReminderAddScreen
+package com.example.reminderme.View.ReminderAddScreen
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background

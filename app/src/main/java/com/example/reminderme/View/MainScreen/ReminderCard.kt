@@ -1,4 +1,4 @@
-package com.example.reminderme.Veiw.MainScreen
+package com.example.reminderme.View.MainScreen
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
