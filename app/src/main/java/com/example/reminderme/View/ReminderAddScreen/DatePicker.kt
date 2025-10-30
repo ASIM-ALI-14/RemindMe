@@ -37,7 +37,15 @@ fun DatePickerBox(
     val datePickerDialog = DatePickerDialog(
         context,
         { _, selectedYear, selectedMonth, selectedDay ->
-            onDateSelected("$selectedDay/${selectedMonth + 1}/$selectedYear")
+
+            // ⭐️ START: --- Format Fix ---
+            // Ensure day and month are two digits (e.g., 05, 09, 10)
+            val formattedDay = String.format("%02d", selectedDay)
+            val formattedMonth = String.format("%02d", selectedMonth + 1) // +1 because Calendar.MONTH is 0-indexed
+
+            onDateSelected("$formattedDay/$formattedMonth/$selectedYear") // 👈 Use "dd/MM/yyyy"
+            // ⭐️ END: --- Format Fix ---
+
         },
         year, month, day
     )

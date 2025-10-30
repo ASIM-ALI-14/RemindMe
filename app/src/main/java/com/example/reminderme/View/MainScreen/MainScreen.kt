@@ -1,9 +1,7 @@
 package com.example.reminderme.View.MainScreen
 
-
 import android.text.format.DateFormat
 import android.widget.Toast
-
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -39,11 +37,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.reminderme.Model.Reminder
 import com.example.reminderme.ViewModel.ReminderViewModel
-
-
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import java.text.SimpleDateFormat // 👈 Import SimpleDateFormat
+import java.util.Date             // 👈 Import Date
+import java.util.Locale           // 👈 Import Locale
 
 @Composable
 fun MainScreen(
@@ -85,6 +83,24 @@ fun MainScreen(
     val formattedAMPM = DateFormat.format("a", currentTime.value)
     val formattedDay = DateFormat.format("EEEE,", currentTime.value)
     val formattedDate = DateFormat.format("MMMM dd", currentTime.value)
+
+    // ⭐️ ADDED: Format the selected date for the header
+    val formattedSelectedDate: String = remember(selectedDate) {
+        (if (selectedDate == null) {
+            "Today's Reminders"
+        } else {
+            try {
+                // Parse "dd/MM/yyyy"
+                val parser = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val date: Date = parser.parse(selectedDate) ?: Date()
+                // Format to "EEE, MMMM dd" (e.g., "Thu, October 30")
+                val formatter = SimpleDateFormat("EEE, MMMM dd", Locale.getDefault())
+                formatter.format(date)
+            } catch (e: Exception) {
+                selectedDate // Fallback to raw date if parsing fails
+            }
+        }) as String
+    }
 
     val textOffsetX = remember { Animatable(-50f) }
     val cardOffsetX = remember { Animatable(50f) }
@@ -191,7 +207,15 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(39.dp))
 
             // 🔹 Calendar
-            OptimizedCalendar(onDateSelected = { date -> selectedDate = date })
+            // ⭐️ UPDATED: Pass new parameters
+            OptimizedCalendar(
+                reminders = remindersState.value, // 👈 Pass full list
+                selectedDate = selectedDate,      // 👈 Pass selected date
+                onDateSelected = { date ->
+                    // ⭐️ ADDED: Toggle selection
+                    selectedDate = if (selectedDate == date) null else date
+                }
+            )
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -212,7 +236,8 @@ fun MainScreen(
                     Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.White)
                 }
 
-                Text("Today's Reminders", fontSize = 23.sp)
+                // ⭐️ UPDATED: Use dynamic header text
+                Text(formattedSelectedDate, fontSize = 23.sp, modifier = Modifier.weight(1f).padding(horizontal = 8.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
@@ -229,12 +254,17 @@ fun MainScreen(
 
             // 🔹 Reminders List
             if (filteredReminders.isEmpty()) {
-                NoReminderCard()
+                NoReminderCard() // Assuming you have this composable
             } else {
                 filteredReminders.forEach { reminder ->
                     val isDraggingThis = draggingReminder.value == reminder
+
+                    // ⭐️ START: --- Animation State ---
                     val offsetX = remember { Animatable(0f) }
                     val offsetY = remember { Animatable(0f) }
+                    val itemAlpha = remember { Animatable(1f) } // 👈 For fade-out
+                    val itemScale = remember { Animatable(1f) } // 👈 For shrink
+                    // ⭐️ END: --- Animation State ---
 
                     Box(
                         modifier = Modifier
@@ -244,9 +274,11 @@ fun MainScreen(
                                     IntOffset(offsetX.value.toInt(), offsetY.value.toInt())
                                 else IntOffset(0, 0)
                             }
+                            // ⭐️ UPDATED: Use new animation values
                             .graphicsLayer(
-                                scaleX = if (isDraggingThis) 0.93f else 1f,
-                                scaleY = if (isDraggingThis) 0.93f else 1f
+                                scaleX = itemScale.value * (if (isDraggingThis) 0.93f else 1f),
+                                scaleY = itemScale.value * (if (isDraggingThis) 0.93f else 1f),
+                                alpha = itemAlpha.value
                             )
                             .pointerInput(reminder.id) {
                                 detectDragGesturesAfterLongPress(
@@ -261,6 +293,7 @@ fun MainScreen(
                                             offsetY.snapTo(offsetY.value + dragAmount.y)
                                         }
 
+                                        // Note: You may need to adjust these pixel values based on your device/screen
                                         val deleteZoneTop = 850f
                                         val deleteZoneBottom = 1350f
                                         val deleteZoneHorizontal = -600f..600f
@@ -274,21 +307,47 @@ fun MainScreen(
                                     onDragEnd = {
                                         scope.launch {
                                             if (isOverDeleteIcon.value) {
+                                                // ⭐️ START: --- New Delete Animation ---
                                                 draggingReminder.value = null
-                                                offsetY.animateTo(
-                                                    offsetY.value + 400f,
-                                                    animationSpec = tween(500, easing = FastOutSlowInEasing)
-                                                )
-                                                delay(150)
-                                                viewModel.deleteReminder(reminder)
+                                                // Give immediate feedback
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 Toast.makeText(context, "Reminder deleted", Toast.LENGTH_SHORT).show()
+
+                                                // Launch animations in parallel
+                                                launch {
+                                                    itemAlpha.animateTo(
+                                                        targetValue = 0f,
+                                                        animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                                    )
+                                                }
+                                                launch {
+                                                    itemScale.animateTo(
+                                                        targetValue = 0.8f,
+                                                        animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                                    )
+                                                }
+                                                launch {
+                                                    offsetY.animateTo(
+                                                        targetValue = offsetY.value + 150f, // Less vertical drop
+                                                        animationSpec = tween(400, easing = FastOutSlowInEasing)
+                                                    )
+                                                }
+
+                                                // Wait for animations to finish
+                                                delay(400)
+                                                viewModel.deleteReminder(reminder)
+                                                // ⭐️ END: --- New Delete Animation ---
+
                                             } else {
+                                                // Snap back logic
                                                 draggingReminder.value = null
                                                 showDeleteIcon.value = false
                                                 isOverDeleteIcon.value = false
-                                                offsetX.animateTo(0f, tween(400))
-                                                offsetY.animateTo(0f, tween(400))
+                                                launch { offsetX.animateTo(0f, tween(400)) }
+                                                launch { offsetY.animateTo(0f, tween(400)) }
+                                                // Reset alpha/scale
+                                                launch { itemAlpha.animateTo(1f, tween(400)) }
+                                                launch { itemScale.animateTo(1f, tween(400)) }
                                             }
 
                                             showDeleteIcon.value = false
@@ -347,3 +406,5 @@ fun MainScreen(
         }
     }
 }
+
+// You will also need this NoReminderCard composable (or your own implementation)
