@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.reminderme.Model.Reminder
 import com.example.reminderme.Model.ReminderDatabase
 import com.example.reminderme.Model.ReminderRepository
+import com.example.reminderme.Notification.NotificationScheduler
 import kotlinx.coroutines.launch
 
 class ReminderViewModel(application: Application) : AndroidViewModel(application) {
@@ -22,7 +23,14 @@ class ReminderViewModel(application: Application) : AndroidViewModel(application
 
     fun addReminder(reminder: Reminder) = viewModelScope.launch {
         repository.insert(reminder)
+        NotificationScheduler.scheduleReminder(
+            getApplication(), // context
+            title = reminder.title,
+            date = reminder.date,
+            time = reminder.time
+        )
     }
+
 
     fun updateReminder(reminder: Reminder) = viewModelScope.launch {
         repository.update(reminder)
