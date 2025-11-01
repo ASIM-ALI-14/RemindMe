@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import com.example.reminderme.ui.theme.ReminderMETheme
-
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat

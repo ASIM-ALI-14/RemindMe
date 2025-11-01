@@ -1,6 +1,5 @@
-package com.example.reminderme.ViewModel
-
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -8,12 +7,11 @@ import com.example.reminderme.Model.Reminder
 import com.example.reminderme.Model.ReminderDatabase
 import com.example.reminderme.Model.ReminderRepository
 import com.example.reminderme.Notification.NotificationScheduler
+
 import kotlinx.coroutines.launch
 
 class ReminderViewModel(application: Application) : AndroidViewModel(application) {
-
     private val repository: ReminderRepository
-
     init {
         val dao = ReminderDatabase.getDatabase(application).reminderDao()
         repository = ReminderRepository(dao)
@@ -23,6 +21,8 @@ class ReminderViewModel(application: Application) : AndroidViewModel(application
 
     fun addReminder(reminder: Reminder) = viewModelScope.launch {
         repository.insert(reminder)
+
+        // ✅ Schedule notification
         NotificationScheduler.scheduleReminder(
             getApplication(), // context
             title = reminder.title,
@@ -30,7 +30,6 @@ class ReminderViewModel(application: Application) : AndroidViewModel(application
             time = reminder.time
         )
     }
-
 
     fun updateReminder(reminder: Reminder) = viewModelScope.launch {
         repository.update(reminder)

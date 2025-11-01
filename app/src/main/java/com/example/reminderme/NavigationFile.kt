@@ -1,5 +1,6 @@
 package com.example.reminderme
 
+import ReminderViewModel
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -10,7 +11,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.reminderme.Model.Screen
 import com.example.reminderme.View.ReminderAddScreen.AddReminderScreen
 import com.example.reminderme.View.SplashScreen.SplashScreen
-import com.example.reminderme.ViewModel.ReminderViewModel
 import com.example.reminderme.View.MainScreen.MainScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -33,13 +33,11 @@ fun AppNavigation() {
                 })
         }
         composable(Screen.Main.route) {
-           
             MainScreen(
                 viewModel = viewModel,
                 onNavigateToAddReminder = { navController.navigate(Screen.AddReminder.route) })
         }
-        composable(Screen.AddReminder.route) {
-            // use the same viewModel instance from AppNavigation
+        composable(Screen.AddReminder.route) { // use the same viewModel instance from AppNavigation
             AddReminderScreen(
                 onNavigateBack = { navController.popBackStack() },
                 viewModel = viewModel

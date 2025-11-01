@@ -1,64 +1,42 @@
-package com.example.reminderme.Notification
-
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.R
+import android.R.attr.priority
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.media.RingtoneManager
-import android.os.Build
-import androidx.core.app.ActivityCompat
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.reminderme.MainActivity
-import com.example.reminderme.R
 
 object NotificationHelper {
     private const val CHANNEL_ID = "reminder_channel"
 
-    fun showNotification(context: Context, title: String, message: String) {
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    fun showNotification(context: Context, title: String, string: String) {
         val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val intent = Intent(context, MainActivity::class.java)
+        // Intent to open app when notification is tapped
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
+            context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Reminders",
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            val manager = context.getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
-        }
-
+        // Beautiful high-priority notification
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_dialog_info) // or your own icon
+            .setContentTitle("🔔 Reminder: $title")
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText("Priority: ${priority.toString()}")
+            )
+            .setPriority(NotificationCompat.PRIORITY_HIGH) // Show at top
+            .setAutoCancel(true) // Dismiss when tapped
             .setSound(soundUri)
             .setContentIntent(pendingIntent)
             .build()
 
-        // ✅ Check permission before showing
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            NotificationManagerCompat.from(context)
-                .notify(System.currentTimeMillis().toInt(), notification)
-        } else {
-            // Optionally log or handle when user denied notifications
-            println("Notification permission not granted")
-        }
+        // Show notification
+        NotificationManagerCompat.from(context).notify(System.currentTimeMillis().toInt(), notification)
     }
 }

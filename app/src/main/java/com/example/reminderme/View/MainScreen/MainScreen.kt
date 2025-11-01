@@ -1,5 +1,6 @@
 package com.example.reminderme.View.MainScreen
 
+import ReminderViewModel
 import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
@@ -36,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.reminderme.Model.Reminder
-import com.example.reminderme.ViewModel.ReminderViewModel
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat // 👈 Import SimpleDateFormat
